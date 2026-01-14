@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block page_title %}Add Supplier{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary mt-4">Save Supplier</button>
+    </form>
+</div>
+{% endblock %}

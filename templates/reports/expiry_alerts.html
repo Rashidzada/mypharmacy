@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block page_title %}Expiry Alerts{% endblock %}
+
+{% block content %}
+<div class="grid-2">
+    <!-- Expired (Critical) -->
+    <div class="card" style="border-left: 5px solid #000;">
+        <h3 style="color: #000;">expired Items (Action Required)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Batch</th>
+                    <th>Qty</th>
+                    <th>Expiry</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in expired %}
+                <tr style="background: #ffebee;">
+                    <td>{{ b.product.name }}</td>
+                    <td>{{ b.batch_number }}</td>
+                    <td>{{ b.quantity }}</td>
+                    <td>{{ b.expiry_date }}</td>
+                </tr>
+                {% empty %}<tr>
+                    <td colspan="4">No expired items in stock.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Red Zone (High Risk) -->
+    <div class="card" style="border-left: 5px solid #d32f2f;">
+        <h3 style="color: #d32f2f;">Critical Warning (< 45 Days)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Batch</th>
+                            <th>Qty</th>
+                            <th>Expiry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in red_zone %}
+                        <tr>
+                            <td>{{ b.product.name }}</td>
+                            <td>{{ b.batch_number }}</td>
+                            <td>{{ b.quantity }}</td>
+                            <td>{{ b.expiry_date }}</td>
+                        </tr>
+                        {% empty %}<tr>
+                            <td colspan="4">No items in critical zone.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    </div>
+</div>
+
+<div class="grid-2 mt-4">
+    <!-- Yellow Zone (Medium Risk) -->
+    <div class="card" style="border-left: 5px solid #fbc02d;">
+        <h3 style="color: #fbc02d;">Medium Warning (< 3 Months)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Batch</th>
+                            <th>Qty</th>
+                            <th>Expiry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in yellow_zone %}
+                        <tr>
+                            <td>{{ b.product.name }}</td>
+                            <td>{{ b.batch_number }}</td>
+                            <td>{{ b.quantity }}</td>
+                            <td>{{ b.expiry_date }}</td>
+                        </tr>
+                        {% empty %}<tr>
+                            <td colspan="4">No items in warning zone.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    </div>
+
+    <!-- Green Zone (Low Risk) -->
+    <div class="card" style="border-left: 5px solid #388e3c;">
+        <h3 style="color: #388e3c;">Low Warning (< 6 Months)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Batch</th>
+                            <th>Qty</th>
+                            <th>Expiry</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in green_zone %}
+                        <tr>
+                            <td>{{ b.product.name }}</td>
+                            <td>{{ b.batch_number }}</td>
+                            <td>{{ b.quantity }}</td>
+                            <td>{{ b.expiry_date }}</td>
+                        </tr>
+                        {% empty %}<tr>
+                            <td colspan="4">No items in watch zone.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    </div>
+</div>
+{% endblock %}

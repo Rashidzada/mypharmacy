@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block page_title %}Daily Sales Report{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="header" style="border-bottom: none; margin-bottom: 1rem;">
+        <form method="get" style="display: flex; gap: 1rem; align-items: center;">
+            <label>Select Date:</label>
+            <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" onchange="this.form.submit()"
+                style="padding: 0.5rem;">
+        </form>
+        <div class="stats-number" style="font-size: 1.5rem; color: var(--primary);">
+            Total: Rs. {{ summary.total_sales|default_if_none:0|floatformat:2 }}
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Time</th>
+                    <th>Subtotal</th>
+                    <th>Discount</th>
+                    <th>Tax</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.invoice_number }}</td>
+                    <td>{{ sale.date|date:"H:i" }}</td>
+                    <td>{{ sale.sub_total|floatformat:2 }}</td>
+                    <td>{{ sale.discount_amount|floatformat:2 }}</td>
+                    <td>{{ sale.tax_amount|floatformat:2 }}</td>
+                    <td style="font-weight: bold;">{{ sale.grand_total|floatformat:2 }}</td>
+                    <td>{{ sale.payment_mode }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No sales found for this date.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

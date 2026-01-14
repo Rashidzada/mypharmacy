@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="grid-4">
+    <div class="stats-card">
+        <div class="stats-label">Today's Sales</div>
+        <div class="stats-number">Rs. {{ todays_sales|floatformat:2 }}</div>
+    </div>
+    <div class="stats-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+        <div class="stats-label">Low Stock Items</div>
+        <div class="stats-number">{{ low_stock }}</div>
+    </div>
+    <div class="stats-card" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+        <div class="stats-label">Expired Products</div>
+        <div class="stats-number">{{ expired }}</div>
+    </div>
+    <div class="stats-card" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+        <div class="stats-label">Total Products</div>
+        <div class="stats-number">{{ total_products }}</div>
+    </div>
+</div>
+
+<div class="grid-2 mt-4">
+    <div class="card">
+        <h3>Recent Sales</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in recent_sales %}
+                <tr>
+                    <td>{{ s.invoice_number }}</td>
+                    <td>{{ s.date|date:"Y-m-d" }}</td>
+                    <td>{{ s.grand_total|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No recent sales</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <div class="grid-2">
+            <a href="{% url 'pos' %}" class="btn btn-primary">
+                <ion-icon name="cart"></ion-icon> New Sale
+            </a>
+            <a href="{% url 'product_create' %}" class="btn btn-primary"
+                style="background: var(--accent); color: #000;">
+                <ion-icon name="add-circle"></ion-icon> Add Product
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

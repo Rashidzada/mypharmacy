@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block page_title %}Point of Sale{% endblock %}
+
+{% block content %}
+<div class="grid-3" style="grid-template-columns: 2fr 1fr; height: calc(100vh - 140px);">
+    <!-- Left: Product List & Search -->
+    <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+            <input type="text" id="product-search" placeholder="Search by name, brand, or category..."
+                style="flex: 1; padding: 1rem; font-size: 1.1rem;">
+        </div>
+
+        <div id="search-results"
+            style="flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; align-content: start;">
+            <!-- JS will populate this -->
+            <div style="grid-column: 1/-1; text-align: center; color: #aaa; margin-top: 2rem;">
+                Start typing to search products...
+            </div>
+        </div>
+
+        <!-- Manual Item Entry -->
+        <div style="padding: 1rem; background: #f8fafc; border-top: 1px solid #eee;">
+            <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--primary);">Add Manual Item
+            </h4>
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="manualName" placeholder="Item Name" class="form-control"
+                    style="flex: 2; padding: 0.5rem;">
+                <input type="number" id="manualPrice" placeholder="Price" class="form-control"
+                    style="flex: 1; padding: 0.5rem;">
+                <input type="number" id="manualQty" placeholder="Qty" value="1" class="form-control"
+                    style="width: 60px; padding: 0.5rem;">
+                <button id="manualAddBtn" type="button" class="btn btn-primary" style="padding: 0.5rem 1rem;">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Cart & Checkout -->
+    <div class="card" style="display: flex; flex-direction: column; background: #fff;">
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">Current Sale</h3>
+
+        <!-- Customer Section -->
+        <div class="customer-section"
+            style="margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px dashed #ddd;">
+            <div style="display: grid; gap: 0.5rem;">
+                <div style="position: relative;">
+                    <input type="text" id="customerPhone" list="customerList" placeholder="Customer Phone"
+                        class="form-control" style="width: 100%; padding: 0.5rem;">
+                    <datalist id="customerList">
+                        <!-- Populated by JS -->
+                    </datalist>
+                </div>
+                <input type="text" id="customerName" placeholder="Customer Name" class="form-control"
+                    style="width: 100%; padding: 0.5rem;">
+            </div>
+        </div>
+
+        <div class="cart-items" id="cart-items" style="flex: 1; overflow-y: auto; margin-bottom: 1rem;">
+            <!-- Cart Items -->
+            <div style="text-align: center; color: #ccc; margin-top: 2rem;">Cart is empty</div>
+        </div>
+
+        <div style="border-top: 2px dashed #eee; padding-top: 1rem;">
+            <div class="flex-between"><span>Subtotal:</span> <strong id="cart-subtotal">0.00</strong></div>
+            <div class="flex-between"><span>Discount:</span> <input type="number" id="bill-discount" value="0"
+                    style="width: 60px; padding: 0.25rem;"></div>
+            <div class="flex-between"><span>Tax:</span> <strong id="cart-tax">0.00</strong></div>
+            <div class="flex-between" style="font-size: 1.5rem; color: var(--primary-dark); margin-top: 0.5rem;">
+                <span>Total:</span> <strong id="cart-total">0.00</strong>
+            </div>
+
+            <div class="mt-4">
+                <select id="payment-mode" style="margin-bottom: 0.5rem;">
+                    <option value="CASH">Cash</option>
+                    <option value="CARD">Card</option>
+                    <option value="ONLINE">Online</option>
+                </select>
+                <button id="btn-checkout" class="btn btn-primary"
+                    style="width: 100%; justify-content: center; font-size: 1.2rem;">
+                    <ion-icon name="print-outline" style="margin-right: 0.5rem;"></ion-icon> Save & Print
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.customersData = JSON.parse('{{ customers_json|escapejs }}');
+</script>
+<script src="{% static 'js/pos.js' %}?v=2"></script>
+{% endblock %}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice {{ invoice.invoice_number }}</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 300px;
+            margin: 0 auto;
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+        }
+
+        .store-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .details {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 5px 0;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .totals {
+            margin-top: 20px;
+            border-top: 1px dashed #000;
+            padding-top: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8rem;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body onload="window.print()">
+
+    <div class="header">
+        <div class="store-name">OnlyMed Pharmacy</div>
+        <div>Main Street, Cityville</div>
+        <div>Phone: 123-456-7890</div>
+    </div>
+
+    <div class="details">
+        <div><strong>Inv:</strong> {{ invoice.invoice_number }}</div>
+        <div><strong>Date:</strong> {{ invoice.date|date:"d/m/Y H:i" }}</div>
+        {% if invoice.customer %}
+        <div style="margin-top: 5px;">
+            <strong>Customer:</strong> {{ invoice.customer.name }}<br>
+            {% if invoice.customer.phone %}Ph: {{ invoice.customer.phone }}{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th class="right">Price</th>
+                <th class="right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.items.all %}
+            <tr>
+                <td colspan="4" style="padding-bottom: 0;">
+                    {{ item.item_name }}
+                    {% if item.product and item.product.brand %}
+                    <span style="font-size: 0.8em;">({{ item.product.brand.name }})</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>{{ item.quantity }}</td>
+                <td class="right">{{ item.unit_price }}</td>
+                <td class="right">{{ item.total_amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <table>
+            <tr>
+                <td>Subtotal:</td>
+                <td class="right">{{ invoice.sub_total }}</td>
+            </tr>
+            {% if invoice.discount_amount > 0 %}
+            <tr>
+                <td>Discount:</td>
+                <td class="right">-{{ invoice.discount_amount }}</td>
+            </tr>
+            {% endif %}
+            {% if invoice.tax_amount > 0 %}
+            <tr>
+                <td>Tax:</td>
+                <td class="right">{{ invoice.tax_amount }}</td>
+            </tr>
+            {% endif %}
+            <tr style="font-weight: bold; font-size: 1.1rem;">
+                <td>Total:</td>
+                <td class="right">{{ invoice.grand_total }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>Thank you for your business!</p>
+        <p>No Returns without Receipt</p>
+    </div>
+
+    <div class="no-print" style="text-align: center; margin-top: 20px;">
+        <button onclick="window.print()" style="padding: 10px 20px;">Print Again</button>
+        <a href="/sales/pos/" style="display: block; margin-top: 10px;">Back to POS</a>
+    </div>
+
+</body>
+
+</html>

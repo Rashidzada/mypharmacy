@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block page_title %}Cash & Accounts{% endblock %}
+
+{% block content %}
+<div class="grid-4" style="margin-bottom: 2rem;">
+    <div class="stats-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+        <div class="stats-label">Total In (Sales)</div>
+        <div class="stats-number">Rs. {{ sales_total|floatformat:2 }}</div>
+    </div>
+    <div class="stats-card" style="background: linear-gradient(135deg, #f43f5e, #e11d48);">
+        <div class="stats-label">Total Out (Purchases)</div>
+        <div class="stats-number">Rs. {{ purchases_total|floatformat:2 }}</div>
+    </div>
+    <div class="stats-card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+        <div class="stats-label">Expenses</div>
+        <div class="stats-number">Rs. {{ expenses_total|floatformat:2 }}</div>
+    </div>
+    <div class="stats-card" style="background: #333;">
+        <div class="stats-label">Net Cash Today</div>
+        <div class="stats-number">Rs. {{ net_cash|floatformat:2 }}</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <h3>Record Expense</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary mt-4">Save Expense</button>
+        </form>
+    </div>
+    <div class="card">
+        <h3>Today's Expenses</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in recent_expenses %}
+                <tr>
+                    <td>{{ e.category }}</td>
+                    <td>{{ e.amount|floatformat:2 }}</td>
+                    <td>{{ e.note }}</td>
+                </tr>
+                {% empty %}<tr>
+                    <td colspan="3">No expenses recorded today.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

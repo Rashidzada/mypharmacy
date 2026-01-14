@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block page_title %}Suppliers{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="header" style="margin-bottom: 1rem; border-bottom: none;">
+        <div></div>
+        <a href="{% url 'supplier_create' %}" class="btn btn-primary">Add Supplier</a>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Contact Person</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supplier in suppliers %}
+                <tr>
+                    <td>{{ supplier.name }}</td>
+                    <td>{{ supplier.contact_person }}</td>
+                    <td>{{ supplier.phone }}</td>
+                    <td>{{ supplier.address }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No suppliers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pharmacy Manager{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Ionicons for Icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="brand">
+            <ion-icon name="medkit"></ion-icon> OnlyMed
+        </div>
+        <ul class="nav-links">
+            <li><a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                    <ion-icon name="grid-outline"></ion-icon> Dashboard
+                </a></li>
+            <li><a href="{% url 'pos' %}" class="nav-link">
+                    <ion-icon name="cart-outline"></ion-icon> POS (Sales)
+                </a></li>
+            <li><a href="{% url 'product_list' %}" class="nav-link">
+                    <ion-icon name="cube-outline"></ion-icon> Inventory
+                </a></li>
+            <li><a href="{% url 'purchase_create' %}" class="nav-link">
+                    <ion-icon name="bag-add-outline"></ion-icon> Purchase
+                </a></li>
+            <li><a href="{% url 'daily_sales' %}" class="nav-link">
+                    <ion-icon name="bar-chart-outline"></ion-icon> Reports
+                </a></li>
+            <li><a href="{% url 'expiry_alerts' %}" class="nav-link">
+                    <ion-icon name="alarm-outline"></ion-icon> Expiry Alerts
+                </a></li>
+            <li><a href="{% url 'cash_summary' %}" class="nav-link">
+                    <ion-icon name="wallet-outline"></ion-icon> Cash & Accounts
+                </a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header">
+            <h1 class="page-title">{% block page_title %}Overview{% endblock %}</h1>
+            <div class="user-profile">
+                <span>Admin User</span>
+            </div>
+        </header>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block page_title %}New Purchase Invoice{% endblock %}
+{% block content %}
+<div class="card">
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.errors or formset.errors %}
+        <div class="alert alert-error"
+            style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <strong>Please correct the errors below:</strong>
+            {{ form.non_field_errors }}
+            {{ formset.non_form_errors }}
+            <ul>
+                {% for field in form %}
+                {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+                {% for form in formset %}
+                {% for error in form.non_field_errors %}
+                <li>Item Error: {{ error }}</li>
+                {% endfor %}
+                {% for field in form %}
+                {% for error in field.errors %}
+                <li>Item {{ field.label }}: {{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Supplier</label>
+                {{ form.supplier }}
+            </div>
+            <div class="form-group">
+                <label>Invoice Number</label>
+                {{ form.invoice_number }}
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                {{ form.date }}
+            </div>
+            <div class="form-group">
+                <label>Note</label>
+                {{ form.note }}
+            </div>
+        </div>
+
+        <h3 class="mt-4">Items</h3>
+        {{ formset.management_form }}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Batch No</th>
+                        <th>Expiry</th>
+                        <th>Qty</th>
+                        <th>Buy Price</th>
+                        <th>Sell Price</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                    <tr>
+                        <td>{{ form.product }}</td>
+                        <td>{{ form.batch_number }}</td>
+                        <td>{{ form.expiry_date }}</td>
+                        <td>{{ form.quantity }}</td>
+                        <td>{{ form.unit_price }}</td>
+                        <td>{{ form.sale_price }}</td>
+                        <td>{{ form.DELETE }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Save Invoice</button>
+    </form>
+</div>
+{% endblock %}
