@@ -9,8 +9,25 @@
             <input type="date" name="date" value="{{ date|date:'Y-m-d' }}" onchange="this.form.submit()"
                 style="padding: 0.5rem;">
         </form>
-        <div class="stats-number" style="font-size: 1.5rem; color: var(--primary);">
-            Total: Rs. {{ summary.total_sales|default_if_none:0|floatformat:2 }}
+        <div style="display: flex; gap: 1.5rem; align-items: center;">
+            <div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Gross Sales</div>
+                <div class="stats-number" style="font-size: 1.25rem; color: var(--primary);">
+                    Rs. {{ summary.total_sales|default_if_none:0|floatformat:2 }}
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Returns</div>
+                <div class="stats-number" style="font-size: 1.25rem; color: #e11d48;">
+                    Rs. {{ returns_total|floatformat:2 }}
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Net Sales</div>
+                <div class="stats-number" style="font-size: 1.25rem; color: var(--primary-dark);">
+                    Rs. {{ net_sales|floatformat:2 }}
+                </div>
+            </div>
         </div>
     </div>
 
@@ -25,6 +42,7 @@
                     <th>Tax</th>
                     <th>Total</th>
                     <th>Payment</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,10 +55,46 @@
                     <td>{{ sale.tax_amount|floatformat:2 }}</td>
                     <td style="font-weight: bold;">{{ sale.grand_total|floatformat:2 }}</td>
                     <td>{{ sale.payment_mode }}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <a class="btn btn-outline btn-sm" href="{% url 'invoice_print' sale.id %}">View</a>
+                            <a class="btn btn-primary btn-sm" href="{% url 'sales_return_create' sale.id %}">Return</a>
+                        </div>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center">No sales found for this date.</td>
+                    <td colspan="8" class="text-center">No sales found for this date.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Returns</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Time</th>
+                    <th>Refund</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in returns %}
+                <tr>
+                    <td>{{ r.invoice.invoice_number }}</td>
+                    <td>{{ r.date|date:"H:i" }}</td>
+                    <td>Rs. {{ r.refund_amount|floatformat:2 }}</td>
+                    <td>{{ r.reason|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No returns recorded for this date.</td>
                 </tr>
                 {% endfor %}
             </tbody>

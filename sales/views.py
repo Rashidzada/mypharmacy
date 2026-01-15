@@ -1,9 +1,13 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import transaction
+from django.db.models import Sum
+from django.urls import reverse
+from django.contrib import messages
 import json
-from .models import SalesInvoice, SaleItem, Customer
+from decimal import Decimal, ROUND_HALF_UP
+from .models import SalesInvoice, SaleItem, Customer, SalesReturn, SalesReturnItem
 from inventory.models import Product, Batch
 from django.db.models import Q
 
@@ -159,3 +163,97 @@ def create_sale_api(request):
             traceback.print_exc() # Print full stack trace
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Invalid method'}, status=405)
+
+def sales_return_create(request, invoice_id):
+    invoice = get_object_or_404(
+        SalesInvoice.objects.select_related('customer').prefetch_related('items', 'items__product', 'items__batch'),
+        id=invoice_id
+    )
+    sale_items = invoice.items.select_related('product', 'batch').annotate(
+        returned_qty=Sum('return_items__quantity')
+    )
+
+    return_rows = []
+    for item in sale_items:
+        returned_qty = item.returned_qty or 0
+        available_qty = item.quantity - returned_qty
+        if item.quantity and item.total_amount:
+            unit_refund = (item.total_amount / item.quantity).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        else:
+            unit_refund = Decimal(item.unit_price or 0).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        display_name = item.item_name or (item.product.name if item.product else "Item")
+        return_rows.append({
+            'item': item,
+            'display_name': display_name,
+            'returned_qty': returned_qty,
+            'available_qty': available_qty,
+            'unit_refund': unit_refund,
+        })
+
+    if request.method == 'POST':
+        reason = request.POST.get('reason', '').strip()
+        errors = []
+        return_lines = []
+
+        for row in return_rows:
+            field_name = f"return_qty_{row['item'].id}"
+            qty_raw = request.POST.get(field_name, '').strip()
+            if not qty_raw:
+                continue
+            try:
+                qty = int(qty_raw)
+            except ValueError:
+                errors.append(f"Invalid return quantity for {row['display_name']}.")
+                continue
+            if qty <= 0:
+                continue
+            if qty > row['available_qty']:
+                errors.append(f"Return quantity for {row['display_name']} exceeds available.")
+                continue
+
+            total_amount = (row['unit_refund'] * Decimal(qty)).quantize(
+                Decimal('0.01'),
+                rounding=ROUND_HALF_UP
+            )
+            return_lines.append((row['item'], qty, row['unit_refund'], total_amount))
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+
+        if not return_lines:
+            if not errors:
+                messages.error(request, 'Select at least one item to return.')
+        else:
+            with transaction.atomic():
+                sales_return = SalesReturn.objects.create(
+                    invoice=invoice,
+                    reason=reason,
+                    refund_amount=Decimal('0.00')
+                )
+                refund_total = Decimal('0.00')
+                for item, qty, unit_refund, total_amount in return_lines:
+                    SalesReturnItem.objects.create(
+                        sales_return=sales_return,
+                        sale_item=item,
+                        quantity=qty,
+                        unit_refund=unit_refund,
+                        total_amount=total_amount
+                    )
+                    refund_total += total_amount
+                    if item.batch_id:
+                        item.batch.quantity += qty
+                        item.batch.save(update_fields=['quantity'])
+                sales_return.refund_amount = refund_total
+                sales_return.save(update_fields=['refund_amount'])
+
+            messages.success(request, 'Return processed successfully.')
+            return redirect(f"{reverse('daily_sales')}?date={invoice.date.date().isoformat()}")
+
+    return_history = SalesReturn.objects.filter(invoice=invoice).order_by('-date')
+    context = {
+        'invoice': invoice,
+        'return_rows': return_rows,
+        'return_history': return_history,
+    }
+    return render(request, 'sales/return_form.html', context)

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block page_title %}Process Return{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="flex-between" style="margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;">
+        <div>
+            <div><strong>Invoice:</strong> {{ invoice.invoice_number }}</div>
+            <div style="color: var(--text-muted);">Date: {{ invoice.date|date:"M d, Y H:i" }}</div>
+            {% if invoice.customer %}
+            <div style="color: var(--text-muted);">Customer: {{ invoice.customer.name }}</div>
+            {% endif %}
+        </div>
+        <a class="btn btn-outline btn-sm" href="{% url 'invoice_print' invoice.id %}">View Invoice</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Sold Qty</th>
+                        <th>Returned Qty</th>
+                        <th>Available</th>
+                        <th>Unit Refund</th>
+                        <th>Return Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in return_rows %}
+                    <tr>
+                        <td>{{ row.display_name }}</td>
+                        <td>{{ row.item.quantity }}</td>
+                        <td>{{ row.returned_qty }}</td>
+                        <td>{{ row.available_qty }}</td>
+                        <td>Rs. {{ row.unit_refund|floatformat:2 }}</td>
+                        <td>
+                            <input type="number" name="return_qty_{{ row.item.id }}" min="0"
+                                max="{{ row.available_qty }}" {% if row.available_qty == 0 %}disabled{% endif %}>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No items found for this invoice.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-group mt-4">
+            <label>Return Reason (optional)</label>
+            <textarea name="reason" rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Process Return</button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Return Policy</h3>
+    <p style="color: var(--text-muted);">
+        Returns must match the original invoice quantities and are processed back to inventory.
+        Items without a recorded batch are refunded but do not affect stock.
+    </p>
+</div>
+
+<div class="card">
+    <h3>Previous Returns</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Refund</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in return_history %}
+                <tr>
+                    <td>{{ r.date|date:"M d, Y H:i" }}</td>
+                    <td>Rs. {{ r.refund_amount|floatformat:2 }}</td>
+                    <td>{{ r.reason|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No previous returns for this invoice.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

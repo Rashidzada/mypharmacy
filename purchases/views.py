@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import DecimalField, F, Sum
 from .models import Supplier, PurchaseInvoice
 from .forms import SupplierForm, PurchaseInvoiceForm, PurchaseItemFormSet
 from django.contrib import messages
@@ -39,6 +40,20 @@ def purchase_create(request):
                 )
                 item.batch = batch
                 item.save()
+            totals = invoice.items.aggregate(
+                sub_total=Sum(
+                    F('quantity') * F('unit_price'),
+                    output_field=DecimalField(max_digits=12, decimal_places=2),
+                ),
+                total_discount=Sum('discount_amount'),
+                total_tax=Sum('tax_amount'),
+                grand_total=Sum('total_amount'),
+            )
+            invoice.sub_total = totals['sub_total'] or 0
+            invoice.total_discount = totals['total_discount'] or 0
+            invoice.total_tax = totals['total_tax'] or 0
+            invoice.grand_total = totals['grand_total'] or 0
+            invoice.save()
             messages.success(request, 'Purchase Invoice saved and Stock updated.')
             return redirect('dashboard') # Or purchase list
         else:

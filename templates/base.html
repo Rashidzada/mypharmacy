@@ -50,7 +50,28 @@
         <header class="header">
             <h1 class="page-title">{% block page_title %}Overview{% endblock %}</h1>
             <div class="user-profile">
-                <span>Admin User</span>
+                {% if request.user.is_authenticated %}
+                <div class="user-chip">
+                    <ion-icon name="person-circle-outline"></ion-icon>
+                    <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+                    {% if request.user.is_staff %}
+                    <span class="user-badge">Admin</span>
+                    {% endif %}
+                </div>
+                {% if request.user.is_staff %}
+                <a class="btn btn-outline btn-sm" href="/admin/">Admin</a>
+                {% endif %}
+                <form method="post" action="{% url 'logout' %}?next={{ request.path }}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline btn-sm">Logout</button>
+                </form>
+
+                {% else %}
+                <a class="btn btn-primary btn-sm" href="{% url 'login' %}?next={{ request.path }}">
+                    Login
+                </a>
+
+                {% endif %}
             </div>
         </header>
 

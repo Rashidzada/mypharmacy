@@ -101,3 +101,23 @@ class SaleItem(models.Model):
     def __str__(self):
         name = self.item_name or (self.product.name if self.product else "Item")
         return f"{name} ({self.quantity})"
+
+class SalesReturn(models.Model):
+    invoice = models.ForeignKey(SalesInvoice, on_delete=models.PROTECT, related_name='returns')
+    date = models.DateTimeField(default=timezone.now)
+    reason = models.TextField(blank=True)
+    refund_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Return {self.id} - {self.invoice.invoice_number}"
+
+class SalesReturnItem(models.Model):
+    sales_return = models.ForeignKey(SalesReturn, on_delete=models.CASCADE, related_name='items')
+    sale_item = models.ForeignKey(SaleItem, on_delete=models.PROTECT, related_name='return_items')
+    quantity = models.PositiveIntegerField()
+    unit_refund = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.sale_item} - {self.quantity} returned"

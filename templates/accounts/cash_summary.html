@@ -2,7 +2,7 @@
 {% block page_title %}Cash & Accounts{% endblock %}
 
 {% block content %}
-<div class="grid-4" style="margin-bottom: 2rem;">
+<div class="grid-4" style="margin-bottom: 2rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
     <div class="stats-card" style="background: linear-gradient(135deg, #10b981, #059669);">
         <div class="stats-label">Total In (Sales)</div>
         <div class="stats-number">Rs. {{ sales_total|floatformat:2 }}</div>
@@ -10,6 +10,10 @@
     <div class="stats-card" style="background: linear-gradient(135deg, #f43f5e, #e11d48);">
         <div class="stats-label">Total Out (Purchases)</div>
         <div class="stats-number">Rs. {{ purchases_total|floatformat:2 }}</div>
+    </div>
+    <div class="stats-card" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+        <div class="stats-label">Returns (Refunds)</div>
+        <div class="stats-number">Rs. {{ returns_total|floatformat:2 }}</div>
     </div>
     <div class="stats-card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
         <div class="stats-label">Expenses</div>
@@ -54,5 +58,84 @@
             </tbody>
         </table>
     </div>
+</div>
+
+<div class="card">
+    <h3>Today's Purchases</h3>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice</th>
+                    <th>Supplier</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in today_purchases %}
+                <tr>
+                    <td>{{ p.invoice_number }}</td>
+                    <td>{{ p.supplier.name }}</td>
+                    <td>{{ p.date|date:"M d, Y" }}</td>
+                    <td>Rs. {{ p.total_amount|default_if_none:0|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">No purchases recorded today.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Monthly Records</h3>
+    <p style="color: var(--text-muted); margin-bottom: 1rem;">Click a month to view daily record summary.</p>
+    {% for record in monthly_summaries %}
+    <details style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+        <summary style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; cursor: pointer;">
+            <span style="font-weight: 600;">{{ record.month|date:"F Y" }}</span>
+            <span>Sales: Rs. {{ record.sales_total|floatformat:2 }}</span>
+            <span>Purchases: Rs. {{ record.purchases_total|floatformat:2 }}</span>
+            <span>Returns: Rs. {{ record.returns_total|floatformat:2 }}</span>
+            <span>Expenses: Rs. {{ record.expenses_total|floatformat:2 }}</span>
+            <span>Net: Rs. {{ record.net_total|floatformat:2 }}</span>
+        </summary>
+        <div class="table-container mt-4">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Sales</th>
+                        <th>Purchases</th>
+                        <th>Returns</th>
+                        <th>Expenses</th>
+                        <th>Net</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in record.daily_records %}
+                    <tr>
+                        <td>{{ day.day|date:"M d, Y" }}</td>
+                        <td>Rs. {{ day.sales_total|floatformat:2 }}</td>
+                        <td>Rs. {{ day.purchases_total|floatformat:2 }}</td>
+                        <td>Rs. {{ day.returns_total|floatformat:2 }}</td>
+                        <td>Rs. {{ day.expenses_total|floatformat:2 }}</td>
+                        <td>Rs. {{ day.net_total|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No daily records for this month.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% empty %}
+    <p>No monthly records found yet.</p>
+    {% endfor %}
 </div>
 {% endblock %}
