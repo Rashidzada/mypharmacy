@@ -91,13 +91,38 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
     margin-bottom: 2rem;
+}
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .page-title {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--primary-dark);
+}
+.live-clock {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+.live-clock ion-icon {
+    font-size: 1rem;
+    color: var(--primary);
 }
 
 .user-profile {

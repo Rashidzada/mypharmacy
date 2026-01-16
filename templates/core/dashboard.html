@@ -2,6 +2,13 @@
 
 {% block page_title %}Dashboard{% endblock %}
 
+{% block header_extra %}
+<div id="liveClock" class="live-clock">
+    <ion-icon name="time-outline"></ion-icon>
+    <span class="live-clock-text"></span>
+</div>
+{% endblock %}
+
 {% block content %}
 {% if show_expiry_widget %}
 <div class="card expiry-widget">
@@ -91,4 +98,31 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const clock = document.getElementById('liveClock');
+        if (!clock) {
+            return;
+        }
+        const text = clock.querySelector('.live-clock-text') || clock;
+        const dateFormatter = new Intl.DateTimeFormat(undefined, {
+            weekday: 'short',
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
+        const timeFormatter = new Intl.DateTimeFormat(undefined, {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true,
+        });
+        const updateClock = () => {
+            const now = new Date();
+            text.textContent = `${dateFormatter.format(now)} - ${timeFormatter.format(now)}`;
+        };
+        updateClock();
+        setInterval(updateClock, 1000);
+    });
+</script>
 {% endblock %}

@@ -48,7 +48,10 @@
     <!-- Main Content -->
     <main class="main-content">
         <header class="header">
-            <h1 class="page-title">{% block page_title %}Overview{% endblock %}</h1>
+            <div class="header-title">
+                <h1 class="page-title">{% block page_title %}Overview{% endblock %}</h1>
+                {% block header_extra %}{% endblock %}
+            </div>
             <div class="user-profile">
                 {% if request.user.is_authenticated %}
                 <div class="user-chip">
