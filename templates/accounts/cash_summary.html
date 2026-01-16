@@ -151,6 +151,11 @@
                 </tfoot>
             </table>
         </div>
+        <div class="print-actions">
+            <button type="button" class="btn btn-outline btn-sm print-month-btn">
+                <ion-icon name="print-outline"></ion-icon> Print
+            </button>
+        </div>
     </details>
     {% empty %}
     <p>No monthly records found yet.</p>
@@ -169,6 +174,99 @@
         };
         toggle.addEventListener('click', () => {
             setState(!card.classList.contains('excel-view'));
+        });
+        const printButtons = document.querySelectorAll('.print-month-btn');
+        printButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const details = button.closest('details');
+                if (!details) {
+                    return;
+                }
+                const summary = details.querySelector('summary');
+                const summarySpans = summary ? Array.from(summary.querySelectorAll('span')) : [];
+                const monthLabel = summarySpans[0] ? summarySpans[0].textContent.trim() : 'Monthly Records';
+                const summaryText = summarySpans
+                    .slice(1)
+                    .map((span) => span.textContent.trim())
+                    .filter(Boolean)
+                    .join(' | ');
+                const table = details.querySelector('table');
+                if (!table) {
+                    return;
+                }
+                const printedAt = new Date().toLocaleString();
+                const printWindow = window.open('', '_blank', 'width=900,height=650');
+                if (!printWindow) {
+                    return;
+                }
+                printWindow.document.write(`
+                    <!doctype html>
+                    <html>
+                        <head>
+                            <meta charset="utf-8">
+                            <title>Monthly Records - ${monthLabel}</title>
+                            <style>
+                                body {
+                                    font-family: "Inter", Arial, sans-serif;
+                                    color: #0f172a;
+                                    margin: 24px;
+                                }
+                                h1 {
+                                    font-size: 18px;
+                                    margin: 0 0 6px;
+                                }
+                                .meta {
+                                    font-size: 12px;
+                                    color: #475569;
+                                    margin-bottom: 12px;
+                                }
+                                .printed-at {
+                                    font-size: 11px;
+                                    color: #64748b;
+                                    margin-bottom: 16px;
+                                }
+                                table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                }
+                                th, td {
+                                    border: 1px solid #e2e8f0;
+                                    padding: 8px 10px;
+                                    font-size: 12px;
+                                }
+                                th {
+                                    background: #f8fafc;
+                                    text-align: left;
+                                }
+                                td:nth-child(n+2) {
+                                    text-align: right;
+                                }
+                                tfoot {
+                                    font-weight: 700;
+                                }
+                                .daily-records-table tfoot {
+                                    display: table-footer-group;
+                                }
+                                @media print {
+                                    body { margin: 12mm; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>Monthly Records - ${monthLabel}</h1>
+                            ${summaryText ? `<div class="meta">${summaryText}</div>` : ''}
+                            <div class="printed-at">Printed: ${printedAt}</div>
+                            ${table.outerHTML}
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.focus();
+                printWindow.onafterprint = () => {
+                    printWindow.close();
+                };
+                printWindow.print();
+            });
         });
     });
 </script>

@@ -3,6 +3,36 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
+{% if show_expiry_widget %}
+<div class="card expiry-widget">
+    <div class="expiry-widget-header">
+        <h3>Expiry Notifications</h3>
+        <span class="expiry-widget-note">Stock at risk</span>
+    </div>
+    <div class="expiry-grid">
+        <a class="expiry-tile expiry-expired {% if expiry_counts.expired > 0 %}pulse-strong{% endif %}" href="{% url 'expiry_alerts' %}?tab=expired">
+            <div class="expiry-title"><ion-icon name="alert-circle-outline"></ion-icon> Expired</div>
+            <div class="expiry-count">{{ expiry_counts.expired }}</div>
+            <div class="expiry-note">Action Required</div>
+        </a>
+        <a class="expiry-tile expiry-critical {% if expiry_counts.critical > 0 %}pulse-strong{% endif %}" href="{% url 'expiry_alerts' %}?tab=critical">
+            <div class="expiry-title"><ion-icon name="warning-outline"></ion-icon> Critical (&lt; 45 Days)</div>
+            <div class="expiry-count">{{ expiry_counts.critical }}</div>
+            <div class="expiry-note">High Risk</div>
+        </a>
+        <a class="expiry-tile expiry-medium {% if expiry_counts.medium > 0 %}pulse{% endif %}" href="{% url 'expiry_alerts' %}?tab=medium">
+            <div class="expiry-title"><ion-icon name="time-outline"></ion-icon> Medium (&lt; 3 Months)</div>
+            <div class="expiry-count">{{ expiry_counts.medium }}</div>
+            <div class="expiry-note">Watch Zone</div>
+        </a>
+        <a class="expiry-tile expiry-low {% if expiry_counts.low > 0 %}pulse{% endif %}" href="{% url 'expiry_alerts' %}?tab=low">
+            <div class="expiry-title"><ion-icon name="leaf-outline"></ion-icon> Low (&lt; 6 Months)</div>
+            <div class="expiry-count">{{ expiry_counts.low }}</div>
+            <div class="expiry-note">Monitor</div>
+        </a>
+    </div>
+</div>
+{% endif %}
 <div class="grid-4">
     <div class="stats-card">
         <div class="stats-label">Today's Sales</div>

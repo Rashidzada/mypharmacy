@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.db.models import Sum
 from django.utils import timezone
 from sales.models import SalesInvoice
-from inventory.models import Product, Batch
-from datetime import timedelta
+from inventory.models import Product
+from reports.utils.expiry_alerts import get_expiry_alert_counts
 
 def dashboard(request):
     today = timezone.now().date()
@@ -22,8 +22,8 @@ def dashboard(request):
         if stock < 10: # Threshold
             low_stock_count += 1
             
-    # 3. Expired Products
-    expired_count = Batch.objects.filter(expiry_date__lt=today, quantity__gt=0).count()
+    expiry_counts = get_expiry_alert_counts(today=today)
+    expired_count = expiry_counts["expired"]
     
     # 4. Total Products
     total_products = Product.objects.count()
@@ -37,5 +37,8 @@ def dashboard(request):
         'expired': expired_count,
         'total_products': total_products,
         'recent_sales': recent_sales,
+        'expiry_counts': expiry_counts,
+        'show_expiry_widget': request.user.is_authenticated
+        and (request.user.is_staff or request.user.has_perm('reports.view_reports')),
     }
     return render(request, 'core/dashboard.html', context)

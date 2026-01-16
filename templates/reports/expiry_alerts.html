@@ -4,7 +4,7 @@
 {% block content %}
 <div class="grid-2">
     <!-- Expired (Critical) -->
-    <div class="card" style="border-left: 5px solid #000;">
+    <div class="card expiry-section" id="expiry-expired" data-expiry-tab="expired" style="border-left: 5px solid #000;">
         <h3 style="color: #000;">expired Items (Action Required)</h3>
         <table>
             <thead>
@@ -32,7 +32,7 @@
     </div>
 
     <!-- Red Zone (High Risk) -->
-    <div class="card" style="border-left: 5px solid #d32f2f;">
+    <div class="card expiry-section" id="expiry-critical" data-expiry-tab="critical" style="border-left: 5px solid #d32f2f;">
         <h3 style="color: #d32f2f;">Critical Warning (< 45 Days)</h3>
                 <table>
                     <thead>
@@ -62,7 +62,7 @@
 
 <div class="grid-2 mt-4">
     <!-- Yellow Zone (Medium Risk) -->
-    <div class="card" style="border-left: 5px solid #fbc02d;">
+    <div class="card expiry-section" id="expiry-medium" data-expiry-tab="medium" style="border-left: 5px solid #fbc02d;">
         <h3 style="color: #fbc02d;">Medium Warning (< 3 Months)</h3>
                 <table>
                     <thead>
@@ -90,7 +90,7 @@
     </div>
 
     <!-- Green Zone (Low Risk) -->
-    <div class="card" style="border-left: 5px solid #388e3c;">
+    <div class="card expiry-section" id="expiry-low" data-expiry-tab="low" style="border-left: 5px solid #388e3c;">
         <h3 style="color: #388e3c;">Low Warning (< 6 Months)</h3>
                 <table>
                     <thead>
@@ -117,4 +117,22 @@
                 </table>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        if (!tab) {
+            return;
+        }
+        const section = document.querySelector(`[data-expiry-tab="${tab}"]`);
+        if (!section) {
+            return;
+        }
+        section.classList.add('expiry-highlight');
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => {
+            section.classList.remove('expiry-highlight');
+        }, 3000);
+    });
+</script>
 {% endblock %}

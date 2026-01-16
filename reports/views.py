@@ -1,44 +1,17 @@
 from django.shortcuts import render
 from django.db.models import Sum
 from django.utils import timezone
-from datetime import timedelta
-from inventory.models import Batch
 from sales.models import SalesInvoice, SalesReturn
+from .utils.expiry_alerts import get_expiry_alert_querysets
 
 def expiry_alerts(request):
-    today = timezone.now().date()
-    
-    # Thresholds
-    red_limit = today + timedelta(days=45)
-    yellow_limit = today + timedelta(days=90)
-    green_limit = today + timedelta(days=180)
-    
-    # Queries
-    expired = Batch.objects.filter(expiry_date__lt=today, quantity__gt=0)
-    
-    red_zone = Batch.objects.filter(
-        expiry_date__gte=today, 
-        expiry_date__lte=red_limit, 
-        quantity__gt=0
-    )
-    
-    yellow_zone = Batch.objects.filter(
-        expiry_date__gt=red_limit, 
-        expiry_date__lte=yellow_limit, 
-        quantity__gt=0
-    )
-    
-    green_zone = Batch.objects.filter(
-        expiry_date__gt=yellow_limit, 
-        expiry_date__lte=green_limit, 
-        quantity__gt=0
-    )
+    zones = get_expiry_alert_querysets()
     
     context = {
-        'expired': expired,
-        'red_zone': red_zone,
-        'yellow_zone': yellow_zone,
-        'green_zone': green_zone,
+        'expired': zones['expired'],
+        'red_zone': zones['critical'],
+        'yellow_zone': zones['medium'],
+        'green_zone': zones['low'],
     }
     return render(request, 'reports/expiry_alerts.html', context)
 
