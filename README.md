@@ -1,80 +1,130 @@
-# MyPharmacy
+# Pharmacy WebApp (Django)
 
-MyPharmacy is a Django-based pharmacy management and POS system. It covers inventory, purchases, sales, reporting, and day-to-day cash tracking in one web app.
+A Django-based pharmacy management web application covering inventory (products/batches/stock), purchases (supplier invoices/stock-in), sales/POS (stock-out with FIFO batches, invoice print, returns), expiry alerts, and cash-flow summary with Excel exports.
 
-## Features
-- Product catalog with brands, categories, and generic names
-- Batch-level stock tracking with expiry dates and pricing
-- Purchasing workflow with suppliers and automatic stock updates
-- POS sales screen with search, FIFO batch handling, and manual items
-- Discounts and tax calculations at item and invoice levels
-- Customer capture (name/phone) and invoice printing
-- Dashboard with today's sales, low stock, and expiry alerts
-- Reports: expiry alerts and daily sales summary
-- Cash summary with expenses logging
+> Tech stack: Django 6.x, Python 3.x, SQLite (default) or PostgreSQL (optional), Bootstrap-based templates, openpyxl for Excel exports.
 
-## Tech Stack
-- Django (server-side MVC)
-- SQLite (default dev database)
-- Django templates with static assets in `static/`
+---
 
-## Apps
-- `core`: dashboard landing page
-- `inventory`: products, batches, stock
-- `purchases`: suppliers and purchase invoices
-- `sales`: POS, customers, invoices
-- `reports`: expiry and daily sales reports
-- `accounts`: cash summary and expenses
+## Key Features
 
-## Getting Started
+- **Dashboard**: Today's sales total, low-stock count, expiry alerts summary, total products, recent sales.
+- **Inventory**: Products linked to **Brand** and **Category**, batch-wise stock, tax percentage per product.
+- **Purchases (Stock In)**: Supplier management, purchase invoice entry, auto batch creation, totals (subtotal/discount/tax/grand total).
+- **Sales / POS (Stock Out)**:
+  - Product search API (shows price, stock, tax)
+  - Create sale via API (supports manual items + inventory items)
+  - FIFO batch selection by earliest expiry date
+  - Invoice print view
+- **Sales Returns**: Return items from an invoice, stock is restored to batch, refund amount tracked.
+- **Reports**:
+  - Expiry alerts by zones (expired, <=45 days, 46-90 days, 91-180 days)
+  - Daily sales report with returns and net sales
+- **Accounts / Cash Summary**:
+  - Daily sales vs purchases vs expenses vs returns
+  - Monthly grouping
+  - Excel export (daily/month/year)
 
-### Prerequisites
-- Python 3.10+
-- pip
+---
 
-### Setup
-1. Create and activate a virtual environment.
-   - Windows:
-     `python -m venv .venv`
-     `.venv\Scripts\activate`
-   - macOS/Linux:
-     `python -m venv .venv`
-     `source .venv/bin/activate`
-2. Install dependencies:
-   `pip install -r requirements.txt`
-3. Run migrations:
-   `python manage.py migrate`
-4. Create an admin user:
-   `python manage.py createsuperuser`
-5. Start the server:
-   `python manage.py runserver`
-6. Open `http://127.0.0.1:8000/`
+## Modules / Apps
 
-### Using the included database
-A sample `db.sqlite3` is present. If you want a fresh database, delete `db.sqlite3` and re-run `migrate`.
+- `core` - dashboard
+- `inventory` - category/brand/product/batch/stock
+- `purchases` - supplier + purchase invoices
+- `sales` - POS, invoices, returns
+- `reports` - expiry + daily sales
+- `accounts` - expenses + cash summary + Excel export
 
-## Key Routes
-- `/` Dashboard
-- `/inventory/products/` Product list
-- `/inventory/products/add/` Add product
-- `/inventory/products/<id>/add-stock/` Add batch stock
-- `/purchases/suppliers/` Suppliers
-- `/purchases/new/` New purchase invoice
-- `/sales/pos/` POS
-- `/sales/invoice/<id>/print/` Print invoice
-- `/reports/expiry-alerts/` Expiry report
-- `/reports/daily-sales/` Daily sales report
-- `/accounts/summary/` Cash summary
-- `/admin/` Django admin
+---
 
-## Sales API (POS)
-- `GET /sales/api/search/?q=term` returns product suggestions with stock and pricing.
-- `POST /sales/api/create/` creates a sale.
+## Quick Start (Local)
 
-Example request:
+### 1) Create and activate virtual environment
+
+```bash
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+```
+
+### 2) Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+If `requirements.txt` is not present, install at least:
+
+```bash
+pip install django openpyxl
+```
+
+### 3) Run migrations
+
+```bash
+python manage.py migrate
+```
+
+### 4) Create admin user
+
+```bash
+python manage.py createsuperuser
+```
+
+### 5) Run server
+
+```bash
+python manage.py runserver
+```
+
+Open: `http://127.0.0.1:8000/`
+
+---
+
+## Main URLs
+
+- Dashboard: `/`
+- Login: `/auth/login/`
+- Admin: `/admin/`
+
+### Inventory
+- Products: `/inventory/products/`
+- Add Product: `/inventory/products/add/`
+- Edit Product: `/inventory/products/<id>/edit/`
+- Add Stock (Batch): `/inventory/products/<id>/add-stock/`
+
+### Purchases
+- Suppliers: `/purchases/suppliers/`
+- Add Supplier: `/purchases/suppliers/add/`
+- New Purchase Invoice: `/purchases/new/`
+
+### Sales
+- POS: `/sales/pos/`
+- Product Search API: `/sales/api/search/?q=panadol`
+- Create Sale API: `/sales/api/create/` (POST JSON)
+- Invoice Print: `/sales/invoice/<id>/print/`
+- Invoice Return: `/sales/invoice/<id>/return/`
+
+### Reports
+- Expiry Alerts: `/reports/expiry-alerts/`
+- Daily Sales: `/reports/daily-sales/?date=YYYY-MM-DD`
+
+### Accounts
+- Cash Summary: `/accounts/summary/`
+- Export Daily Records: `/accounts/summary/export/daily/?month=YYYY-MM`
+- Export Monthly Records: `/accounts/summary/export/month/?month=YYYY-MM`
+- Export Yearly Summary: `/accounts/summary/export/year/?year=YYYY&include_daily=1`
+
+---
+
+## Sales API Payload Example
+
 ```json
 {
-  "customer_name": "Ali Khan",
+  "customer_name": "Ali",
   "customer_phone": "03001234567",
   "payment_mode": "CASH",
   "discount_percentage": 0,
@@ -93,23 +143,29 @@ Example request:
       "discount_amount": 0,
       "tax_amount": 0,
       "total": 500
+    },
+    {
+      "type": "manual",
+      "name": "Service Charge",
+      "quantity": 1,
+      "price": 50
     }
   ]
 }
 ```
 
-Manual item example:
-```json
-{ "type": "manual", "name": "Custom Item", "quantity": 1, "price": 100 }
-```
+---
 
-## Running Tests
-`python manage.py test`
+## Notes / Production Checklist
 
-## Configuration Notes
-- Settings: `pharmacy_project/settings.py`
-- Static files: `static/` (use `python manage.py collectstatic` for production)
-- Media uploads: `media/`
+- Set `DEBUG=False` and configure `ALLOWED_HOSTS`.
+- Move `SECRET_KEY` to environment variables.
+- Use PostgreSQL in production (settings template is included).
+- Add proper user roles/permissions (staff vs cashier vs manager).
+- Add automated tests for purchase/sale/returns flows.
+
+---
 
 ## License
-Not specified.
+
+This repository can be licensed per client agreement.
