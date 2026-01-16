@@ -90,8 +90,11 @@
     </div>
 </div>
 
-<div class="card">
+<div class="card" id="monthly-records-card">
     <h3>Monthly Records</h3>
+    <div class="summary-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="excel-view-toggle" aria-pressed="false">Excel View</button>
+    </div>
     <p style="color: var(--text-muted); margin-bottom: 1rem;">Click a month to view daily record summary.</p>
     {% for record in monthly_summaries %}
     <details style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
@@ -103,27 +106,32 @@
             <span>Expenses: Rs. {{ record.expenses_total|floatformat:2 }}</span>
             <span>Net: Rs. {{ record.net_total|floatformat:2 }}</span>
         </summary>
-        <div class="table-container mt-4">
-            <table>
+        <div class="export-actions">
+            <a class="btn btn-sm btn-primary export-btn" href="{% url 'cash_summary_export_daily' %}?month={{ record.month|date:'Y-m' }}">Export Daily (Excel)</a>
+            <a class="btn btn-sm btn-primary export-btn" href="{% url 'cash_summary_export_month' %}?month={{ record.month|date:'Y-m' }}">Export Monthly (Excel)</a>
+            <a class="btn btn-sm btn-primary export-btn" href="{% url 'cash_summary_export_year' %}?year={{ record.month|date:'Y' }}">Export Yearly (Excel)</a>
+        </div>
+        <div class="table-container">
+            <table class="daily-records-table">
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Sales</th>
-                        <th>Purchases</th>
-                        <th>Returns</th>
-                        <th>Expenses</th>
-                        <th>Net</th>
+                        <th class="number-head">Sales</th>
+                        <th class="number-head">Purchases</th>
+                        <th class="number-head">Returns</th>
+                        <th class="number-head">Expenses</th>
+                        <th class="number-head">Net</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for day in record.daily_records %}
                     <tr>
                         <td>{{ day.day|date:"M d, Y" }}</td>
-                        <td>Rs. {{ day.sales_total|floatformat:2 }}</td>
-                        <td>Rs. {{ day.purchases_total|floatformat:2 }}</td>
-                        <td>Rs. {{ day.returns_total|floatformat:2 }}</td>
-                        <td>Rs. {{ day.expenses_total|floatformat:2 }}</td>
-                        <td>Rs. {{ day.net_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ day.sales_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ day.purchases_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ day.returns_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ day.expenses_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ day.net_total|floatformat:2 }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -131,6 +139,16 @@
                     </tr>
                     {% endfor %}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total</td>
+                        <td class="number-cell">Rs. {{ record.sales_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ record.purchases_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ record.returns_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ record.expenses_total|floatformat:2 }}</td>
+                        <td class="number-cell">Rs. {{ record.net_total|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </details>
@@ -138,4 +156,20 @@
     <p>No monthly records found yet.</p>
     {% endfor %}
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('excel-view-toggle');
+        const card = document.getElementById('monthly-records-card');
+        if (!toggle || !card) {
+            return;
+        }
+        const setState = (isActive) => {
+            card.classList.toggle('excel-view', isActive);
+            toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        };
+        toggle.addEventListener('click', () => {
+            setState(!card.classList.contains('excel-view'));
+        });
+    });
+</script>
 {% endblock %}

@@ -187,6 +187,10 @@ body {
 .btn:active { transform: scale(0.98); }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-dark); }
+.btn-success { background: #16a34a; color: white; }
+.btn-success:hover { background: #15803d; }
+.btn-warning { background: #f59e0b; color: white; }
+.btn-warning:hover { background: #d97706; }
 .btn-outline { background: #f8fafc; color: var(--text-main); border: 1px solid #cbd5e1; }
 .btn-outline:hover { background: #eef2f7; }
 .btn-sm { padding: 0.4rem 0.75rem; font-size: 0.85rem; }
@@ -197,6 +201,42 @@ table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: 1rem; border-bottom: 1px solid #e2e8f0; }
 th { background: #f8fafc; font-weight: 600; color: var(--text-muted); }
 tr:hover { background: #fdfdfd; }
+.summary-actions,
+.export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+.summary-actions { justify-content: flex-end; margin-bottom: 0.75rem; }
+.export-actions { margin-top: 1rem; margin-bottom: 0.75rem; }
+.export-actions .export-btn {
+    border-color: transparent;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.daily-records-table tfoot { display: none; }
+#monthly-records-card.excel-view .daily-records-table {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+#monthly-records-card.excel-view .daily-records-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f8fafc;
+}
+#monthly-records-card.excel-view .daily-records-table td,
+#monthly-records-card.excel-view .daily-records-table th {
+    border: 1px solid #e2e8f0;
+    padding: 0.6rem 0.75rem;
+}
+#monthly-records-card.excel-view .daily-records-table tfoot { display: table-footer-group; }
+#monthly-records-card.excel-view .daily-records-table .number-cell,
+#monthly-records-card.excel-view .daily-records-table .number-head {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+#monthly-records-card.excel-view .daily-records-table tbody tr:hover { background: #eef2f7; }
 
 /* Forms */
 .form-group { margin-bottom: 1rem; }
